@@ -1,4 +1,5 @@
-﻿using SistemaGestion.Models;
+using SistemaGestion.Models;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace SistemaGestion.Repositories
@@ -59,6 +60,103 @@ namespace SistemaGestion.Repositories
             }
             return lista;
         }
+        public Usuario? getUsuarioNombreUsuario(string? nombreUsuario)
+        {
+            
+            if (conexion == null)
+            {
+                throw new Exception("Conexion no establecida");
+            }
+            try
+            {
+
+                using (SqlCommand cmd = new SqlCommand("Select * From Usuario Where NombreUsuario = @nombreUsuario", conexion))
+                {
+                    conexion.Open();
+                    cmd.Parameters.Add(new SqlParameter("@nombreUsuario", SqlDbType.VarChar) { Value = nombreUsuario });
+                    //cmd.ExecuteNonQuery();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.HasRows)
+                        {
+                            dr.Read();
+                            
+                                Usuario usuario = new Usuario();
+                                usuario.Id = int.Parse(dr["Id"].ToString());
+                                usuario.Nombre = dr["Nombre"].ToString();
+                                usuario.Apellido = dr["Apellido"].ToString();
+                                usuario.NombreUsuario = dr["NombreUsuario"].ToString();
+                                usuario.Contrasenia = dr["Contraseña"].ToString();
+                                usuario.Mail = dr["Mail"].ToString();
+                                return usuario;
+
+                            
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                }
+                
+            }
+            catch 
+            {
+                throw;
+            }
+            finally
+            {
+                conexion.Close();
+            }
+        }
+        public Usuario? getUsuarioId(int id)
+        {
+
+            if (conexion == null)
+            {
+                throw new Exception("Conexion no establecida");
+            }
+            try
+            {
+
+                using (SqlCommand cmd = new SqlCommand("Select * From Usuario Where Id = @id", conexion))
+                {
+                    conexion.Open();
+                    cmd.Parameters.Add(new SqlParameter("id", SqlDbType.VarChar) { Value = id });
+                    //cmd.ExecuteNonQuery();
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.HasRows)
+                        {
+                            dr.Read();
+                            Usuario usuario = new Usuario();
+                            usuario.Id = int.Parse(dr["Id"].ToString());
+                            usuario.Nombre = dr["Nombre"].ToString();
+                            usuario.Apellido = dr["Apellido"].ToString();
+                            usuario.NombreUsuario = dr["NombreUsuario"].ToString();
+                            usuario.Contrasenia = dr["Contraseña"].ToString();
+                            usuario.Mail = dr["Mail"].ToString();
+                            return usuario;
+
+
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                }
+
+            }
+            catch 
+            {
+                throw;
+            }
+            finally
+            {
+                conexion.Close();
+            }
+        }
         public bool eliminarUsuario(int id)
         {
 
@@ -111,7 +209,7 @@ namespace SistemaGestion.Repositories
             }
             conexion.Close();
         }
-        public void editarUsuario(Usuario usuario)
+        public Usuario? editarUsuario(int id, Usuario usuarioAeditar)
         {
 
             if (conexion == null)
@@ -120,6 +218,11 @@ namespace SistemaGestion.Repositories
             }
             try
             {
+                Usuario? usuario = this.getUsuarioId(id);
+                if(usuario == null)
+                {
+                    return null;
+                }
 
                 using (SqlCommand cmd = new SqlCommand("UPDATE Usuario SET" +
                                                       "     Nombre = @nombre," +
@@ -137,6 +240,7 @@ namespace SistemaGestion.Repositories
                     cmd.Parameters.Add(new SqlParameter("contraseña", SqlDbType.VarChar) { Value = usuario.Contrasenia });
                     cmd.Parameters.Add(new SqlParameter("mail", SqlDbType.VarChar) { Value = usuario.Mail });
                     cmd.ExecuteNonQuery();
+                    return usuario;
                 }
 
             }
@@ -144,34 +248,21 @@ namespace SistemaGestion.Repositories
             {
                 throw;
             }
-            conexion.Close();
+            finally
+            {
+                conexion.Close();
+            }
+            
         }
-        public bool Login(Usuario usuario)
+        
+        public bool login(string nombreUsuario, string contrasenia)
         {
-
-            if (conexion == null)
+            Usuario? usuario = this.getUsuarioNombreUsuario(nombreUsuario);
+            if (contrasenia == null || usuario == null)
             {
-                throw new Exception("Conexion no establecida");
+                return false;
             }
-            try
-            {
-
-                using (SqlCommand cmd = new SqlCommand("Select * From Usuario where Nombreusuario = @NombreUsuario AND Contraseña = @contraseña", conexion))
-                {
-                    conexion.Open();
-                    cmd.Parameters.Add(new SqlParameter("NombreUsuario", SqlDbType.VarChar) { Value = usuario.NombreUsuario });
-                    cmd.Parameters.Add(new SqlParameter("contraseña", SqlDbType.VarChar) { Value = usuario.Contrasenia });
-                    cmd.ExecuteNonQuery();
-                    return true;
-                }
-
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            conexion.Close();
-            return false;
+            return usuario.Contrasenia == contrasenia;
         }
     }
 }
