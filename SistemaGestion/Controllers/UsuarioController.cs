@@ -6,11 +6,11 @@ using System.Net;
 namespace SistemaGestion.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class UsuarioController : Controller
     {
         private UsuariosRepositorio repository = new UsuariosRepositorio();
-
+        //TRAE TODO LOS USUARIOS
         [HttpGet]
         public IActionResult Get()
         {
@@ -24,7 +24,62 @@ namespace SistemaGestion.Controllers
                 return Problem(ex.Message);
             }
         }
+        [HttpGet("{nombreUsuario}")]
+
+        //TRAE USUARIO POR NOMBREUSUARIO
+        public ActionResult<Usuario> Get(string nombreUsuario)
+        {
+            try
+            {
+                Usuario? usuario = repository.getUsuarioNombreUsuario(nombreUsuario);
+               if(usuario != null)
+                {
+                    return Ok(usuario);
+                }
+                else
+                {
+                    return NotFound("El usuario no existe");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
+
+        [HttpGet("{nombreUsuario}/{contrasenia}")]
+        // INICIO DE SESION
+        public ActionResult<Usuario> Get(string nombreUsuario, string contrasenia)
+        {
+            try
+            {
+                Usuario? usuario = repository.getUsuarioNombreUsuario(nombreUsuario);
+                if (usuario != null)
+                {
+                    bool logeado = repository.login(nombreUsuario, contrasenia);
+                    if (logeado)
+                    {
+                        return Ok(usuario);
+                    }
+                    else
+                    {
+                        return Unauthorized("Contraseña invalida.");
+                    }
+                }
+                else
+                {
+                    return NotFound("El usuario no existe.");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return Problem(ex.Message);
+            }
+        }
         [HttpDelete]
+
+        //SE BORRA EL USUARIO POR ID
         public ActionResult Delete([FromBody] int id)
         {
             try
@@ -59,13 +114,20 @@ namespace SistemaGestion.Controllers
                 return Problem(ex.Message);
             }
         }
-        [HttpPut]
-        public ActionResult Put([FromBody] Usuario usuario)
+        [HttpPut("{id}")]
+        public ActionResult<Usuario> Put(int id,[FromBody] Usuario usuarioAeditar)
         {
             try
             {
-                repository.editarUsuario(usuario);
-                return Ok();
+                Usuario? usuario = repository.editarUsuario(id, usuarioAeditar);
+                if(usuario != null)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound($"El ususario con id {id} no existe!!");
+                }
             }
             catch (Exception ex)
             {
