@@ -6,8 +6,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MiCors,
                       policy =>
                       {
+                          
                           policy.WithOrigins("*");
-                                              
+                          policy.WithHeaders("*");
+                          policy.WithMethods("*");
                       });
 });
 // Add services to the container.
