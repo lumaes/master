@@ -2,17 +2,25 @@
 {
     public class ProductoVendido
     {
-        public int Id { get; set; }
+       public int Id { get; set; }
         public int Stock { get; set; }
         public int IdProducto { get; set; }
         public int IdVenta { get; set; }
 
+        public Producto? Producto { get; set; }
+
         public ProductoVendido()
         {
-            Id = 0;
-            Stock = 0;
-            IdProducto = 0;
-            IdVenta = 0;
+
+        }
+
+        public ProductoVendido(int id, int idProducto, int stock, int idVenta, Producto producto)
+        {
+            this.Id = id;
+            this.Stock = stock;
+            this.IdProducto = idProducto;
+            this.IdVenta = idVenta;
+            this.Producto = producto;
         }
 
     }
